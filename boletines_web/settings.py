@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-l7_hokbvgfx)yqbl$3c%5rze$jr$8r9_#aa@q1x%aj7n3%9sw2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['.onrender.com']
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -120,6 +121,15 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'boletines_app/static')]
 
 
+# Configuración para archivos estáticos
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Ruta donde se recolectan los estáticos en producción
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),  # Directorio global static/ (opcional)
+    os.path.join(BASE_DIR, 'boletines_app/static'),  # Ruta específica de tu app
+]
+
+# Asegúrate de tener esto para el manejo de archivos estáticos en producción
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
