@@ -121,15 +121,16 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'boletines_app/static')]
 
 
-# Configuración para archivos estáticos
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Ruta donde se recolectan los estáticos en producción
+# Corrige STATICFILES_DIRS (elimina rutas que no existan)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Directorio global static/ (opcional)
-    os.path.join(BASE_DIR, 'boletines_app/static'),  # Ruta específica de tu app
+    os.path.join(BASE_DIR, 'boletines_app/static'),  # Solo si existe
 ]
 
-# Asegúrate de tener esto para el manejo de archivos estáticos en producción
+# Asegúrate de tener esto:
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
