@@ -45,6 +45,8 @@
                         <span class="badge bg-warning">Falta</span>
                     {% elif value == '-nohay-' %}
                         <span class="badge bg-secondary">No hay</span>
+                    {% elif value == None %}
+                        <span class="badge bg-secondary">Sin nota</span>
                     {% else %}
                         {{ value }}
                     {% endif %}

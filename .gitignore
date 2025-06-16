@@ -1,0 +1,46 @@
+# Entornos virtuales
+venv/
+env/
+*.pyc
+__pycache__/
+
+# Archivos de configuración local
+*.env
+.env
+
+# Base de datos local (solo si usás PostgreSQL en producción como en Render)
+db.sqlite3
+
+# Archivos de migración generados
+**/migrations/*.py
+**/migrations/*.pyc
+!*/migrations/__init__.py
+
+# Archivos de caché y temporales
+*.log
+*.pot
+*.py[cod]
+*.sqlite3
+*.swp
+*.swo
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación
+/staticfiles/
+boletines_legacy.json
+boletines.json
+
+# Archivos de paquetes de dependencias
+*.egg-info/
+dist/
+build/
+
+# Archivos generados por VSCode o PyCharm
+.vscode/
+.idea/
+
+# Archivos generados por sistema
+*.orig

@@ -1,0 +1,41 @@
+{% extends 'boletines_app/base.html' %}
+
+{% block content %}
+<h2>Boletín {{ trimestre_actual }} – {{ user.first_name }}</h2>
+
+<div class="btn-group mb-4">
+    {% for t in trimestres %}
+    <a href="{% url 'boletin_trimestre' t %}" 
+       class="btn {% if t == trimestre_actual %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        {{ t }}
+    </a>
+    {% endfor %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            {% for etiqueta, valor in boletin.items %}
+            <tr>
+                <th>{{ etiqueta }}</th>
+                <td>
+                    {% if valor == 'exc' %}
+                        <span class="badge bg-success">Excelente</span>
+                    {% elif valor == 'mb' %}
+                        <span class="badge bg-primary">Muy Bien</span>
+                    {% elif valor == 'b' %}
+                        <span class="badge bg-info">Bien</span>
+                    {% elif valor == 'r' %}
+                        <span class="badge bg-warning text-dark">Regular</span>
+                    {% elif valor == '-' %}
+                        <span class="badge bg-secondary">-</span>
+                    {% else %}
+                        {{ valor }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}
