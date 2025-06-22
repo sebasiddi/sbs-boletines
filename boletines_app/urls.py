@@ -7,4 +7,5 @@ urlpatterns = [
     path('perfil/', views.perfil_view, name='perfil'),
     path('boletin/', views.boletin_view, name='boletin'),
     path('boletin/<str:trimestre>/', views.boletin_view, name='boletin_trimestre'),
+
 ]

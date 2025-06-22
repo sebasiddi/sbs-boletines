@@ -1,7 +1,8 @@
 {% extends 'boletines_app/base.html' %}
 
 {% block content %}
-<h2>Boletín {{ trimestre_actual }}</h2>
+<h2>Boletín {{ trimestre_actual }} - <span class="username">{{ user.first_name }}</span></h2>
+
 
 <div class="btn-group mb-4">
     {% for t in trimestres %}
@@ -12,7 +13,6 @@
     </a>
     {% endfor %}
 </div>
-
 <div class="card">
     <div class="card-body">
         <table class="table">

@@ -11,13 +11,32 @@
     </a>
     {% endfor %}
 </div>
-
 <div class="card">
     <div class="card-body">
         <table class="table table-striped">
-            {% for etiqueta, valor in boletin.items %}
+            {% for key, valor in boletin.items %}
             <tr>
-                <th>{{ etiqueta }}</th>
+<!--                 <th>{{ etiqueta }}</th>
+ -->                    <th>
+                    {% if key == 'Wt' %}
+                        <span>Writting Test</span>
+                    {% elif key == 'Ot' %}
+                        <span>Oral Test</span>
+                    {% elif key == 'Pp' %}
+                        <span>Practice Paper</span>
+                    {% elif key == 'Be' %}
+                        <span>Behaviour</span>
+                    {% elif key == 'Pin' %}
+                        <span>Participation in Class</span>
+                    {% elif key == 'Hm' %}
+                        <span>Homework</span>
+                    {% elif key == 'Rp' %}
+                        <span>Relationship with partners</span>
+                    {% else %}
+                        {{ key }}
+                    {% endif %}
+
+                </th>
                 <td>
                     {% if valor == 'exc' %}
                         <span class="badge bg-success">Excelente</span>

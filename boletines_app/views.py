@@ -8,6 +8,11 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from boletines_app.models import Estudiante  # Asegurate de tener este import
 
+
+from django.http import JsonResponse
+from django.contrib.admin.views.decorators import staff_member_required
+from boletines_app.models import Estudiante
+
 @login_required
 def logout_view(request):
     logout(request)
@@ -74,6 +79,8 @@ LABELS_KINDER = {
 }
 ORDEN_TRIMESTRES = ['1T', '2T', '3T']
 @login_required
+
+
 
 def boletin_view(request, trimestre=None):
     estudiante = request.user

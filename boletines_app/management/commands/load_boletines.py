@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('¡Comando detectado correctamente!'))
-        with open('boletines_legacy.json', encoding='utf-8') as f:
+        with open('boletines_DNI_string_limpio.json', encoding='utf-8') as f:
             data = json.load(f)
 
         for curso, trimestres in data.items():
