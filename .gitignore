@@ -32,6 +32,8 @@ Thumbs.db
 /staticfiles/
 boletines_legacy.json
 boletines.json
+boletines_250622_actualizado.json
+*.json
 
 # Archivos de paquetes de dependencias
 *.egg-info/

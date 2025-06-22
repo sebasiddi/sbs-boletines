@@ -25,12 +25,12 @@ FORMATO_POR_CURSO = {
 }
 
 class Command(BaseCommand):
-    help = 'Carga o actualiza boletines desde boletines_legacy.json sin sobrescribir contraseñas'
+    help = 'Carga o actualiza boletines desde boletines_250622_actualizado.json sin sobrescribir contraseñas'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.NOTICE('Cargando datos desde boletines_legacy.json...'))
+        self.stdout.write(self.style.NOTICE('Cargando datos desde boletines_250622_actualizado.json...'))
 
-        with open('boletines_legacy.json', encoding='utf-8') as f:
+        with open('boletines_250622_actualizado_sin_nan.json', encoding='utf-8') as f:
             data = json.load(f)
 
         for curso, trimestres in data.items():
