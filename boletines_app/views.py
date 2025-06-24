@@ -10,7 +10,6 @@ from django.template.loader import get_template
 from django.templatetags.static import static
 from django.conf import settings
 
-from xhtml2pdf import pisa
 from datetime import datetime
 import os
 
