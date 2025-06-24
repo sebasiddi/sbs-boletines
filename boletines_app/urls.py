@@ -7,5 +7,7 @@ urlpatterns = [
     path('perfil/', views.perfil_view, name='perfil'),
     path('boletin/', views.boletin_view, name='boletin'),
     path('boletin/<str:trimestre>/', views.boletin_view, name='boletin_trimestre'),
+    path("boletin/descargar-general-pdf/", views.boletin_general_pdf, name="descargar-general-pdf"),
 
 ]
+

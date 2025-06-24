@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boletín Anual</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 40px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .portada h1 {
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+        .portada p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: left;
+        }
+        .nota {
+            padding: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Portada -->
+<div class="portada" style="page-break-after: always; text-align: center; padding-top: 100px;">
+    <img src="file://{{ logo_path }}" width="150" alt="Logo"><br><br>
+    <h1>Boletín Anual</h1>
+    <p><strong>Estudiante:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><strong>DNI:</strong> {{ user.student.dni }}</p>
+    <p><strong>Curso:</strong> {{ user.student.curso }}</p>
+    <p><strong>Año lectivo:</strong> {{ year }}</p>
+</div>
+
+<!-- Contenido por trimestre -->
+{% for trimestre, boletin in boletines_por_trimestre.items %}
+    {% if boletin.items|length > 0 %}
+        <h2>{{ trimestre }}</h2>
+        <table>
+            {% for key, value in boletin.items %}
+                {% if key not in ['DNI', 'STUDENT', 'TEACHER'] %}
+                <tr>
+                    <th>
+                        {% if key == 'WT' %}Writting Test
+                        {% elif key == 'OT' %}Oral Test
+                        {% elif key == 'PP' %}Practice Paper
+                        {% elif key == 'BE' %}Behaviour
+                        {% elif key == 'PIN' %}Participation in Class
+                        {% elif key == 'HM' %}Homework
+                        {% elif key == 'RP' %}Relationship with partners
+                        {% else %}{{ key }}{% endif %}
+                    </th>
+                    <td>
+                        {% if value == 'exc' %}
+                            <div class="nota" style="background-color: #d4edda; color: #155724;">Excelente</div>
+                        {% elif value == 'falta' %}
+                            <div class="nota" style="background-color: #fff3cd; color: #856404;">Falta</div>
+                        {% elif value == '-nohay-' or value == None %}
+                            <div class="nota" style="background-color: #e2e3e5; color: #383d41;">Sin nota</div>
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+        <br>
+    {% endif %}
+{% endfor %}
+
+</body>
+</html>

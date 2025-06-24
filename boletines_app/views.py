@@ -1,17 +1,25 @@
-
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
-from boletines_app.models import Estudiante  # Asegurate de tener este import
-
-
-from django.http import JsonResponse
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse, HttpResponse
+from django.template.loader import get_template
+from django.templatetags.static import static
+from django.conf import settings
+
+from xhtml2pdf import pisa
+from datetime import datetime
+import os
+
+
+
 from boletines_app.models import Estudiante
+
+logo_path = os.path.join(settings.STATIC_ROOT, 'boletines_app/img/s.png')
+
 
 @login_required
 def logout_view(request):
@@ -135,109 +143,49 @@ def boletin_view(request, trimestre=None):
         "trimestres": trimestres,
         "trimestre_actual": trimestre_actual,
     })
-# Diccionario de etiquetas para mostrar nombres más claros
-""" def boletin_view(request, trimestre=None):
-    estudiante = request.user
-    boletin_completo = estudiante.boletin_data or {}
-    trimestres = sorted(boletin_completo.keys())
-    trimestre_actual = trimestre or trimestres[0] if trimestres else None
 
-    boletin_raw = boletin_completo.get(trimestre_actual, {})
+@login_required
+def boletin_general_pdf(request):
+    try:
+        student = request.user
+        
+        boletines_por_trimestre = {
+            "1T": student.boletin_data.get("1T", {}),
 
-    # Excluir campos que no deben mostrarse
-    excluir = ['DNI', 'STUDENT', 'TEACHER']
-    boletin = {k: v for k, v in boletin_raw.items() if k not in excluir}
-
-    # Elegir el template según el tipo de curso
-    if estudiante.formato_boletin == "kinder":
-        template_name = "boletines_app/boletin_kinder.html"
-        # Mapeo de claves a etiquetas legibles
-        boletin_con_etiquetas = {
-            LABELS_KINDER.get(k.upper(), k.replace("_", " ").title()): v
-            for k, v in boletin.items()
         }
 
-    else:
-        template_name = "boletines_app/boletin_general.html"
-        boletin_con_etiquetas = boletin
-
-    return render(request, template_name, {
-        "boletin": boletin_con_etiquetas,
-        "trimestres": trimestres,
-        "trimestre_actual": trimestre_actual,
-    }) """
-
-""" def boletin_view(request, trimestre='1T'):
-    user = request.user
-    boletin = user.boletin_data.get(trimestre, {})
-
-    template_map = {
-        'kinder': 'boletines_app/boletin_kinder.html',
-        'first': 'boletines_app/boletin_first.html',
-        'general': 'boletines_app/boletin_general.html',
-    }
-    template = template_map.get(user.formato_boletin, 'boletines_app/boletin_general.html')
-
-    return render(request, template, {
-        'boletin': boletin,
-        'trimestre_actual': trimestre,
-        'trimestres': ['1T', '2T', '3T']
-    }) """
-
-
-
-""" 
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
-
-def login_view(request):
-    if request.method == 'POST':
-        dni = request.POST.get('dni')
-        password = request.POST.get('password')
-        user = authenticate(request, dni=dni, password=password)
+        logo_path = os.path.join(
+            settings.BASE_DIR, 'boletines_app', 'static', 'boletines_app', 'img', 's.png'
+        )
         
-        if user is not None:
-            login(request, user)
-            return redirect('perfil')
-        else:
-            messages.error(request, 'DNI o contraseña incorrectos')
-    
-    return render(request, 'boletines_app/login.html')
+        # Verifica que la imagen existe
+        if not os.path.exists(logo_path):
+            raise FileNotFoundError(f"Logo no encontrado en: {logo_path}")
 
-@login_required
-def logout_view(request):
-    logout(request)
-    return redirect('login')
+        context = {
+            'user': request.user,
+            'boletines_por_trimestre': boletines_por_trimestre,
+            'year': 2025,
+            'logo_path': logo_path,
+        }
 
-@login_required
-def perfil_view(request):
-    if request.method == 'POST':
-        form = PasswordChangeForm(request.user, request.POST)
-        if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)  # Mantiene la sesión activa
-            messages.success(request, 'Contraseña actualizada correctamente')
-            return redirect('perfil')
-    else:
-        form = PasswordChangeForm(request.user)
-    
-    return render(request, 'boletines_app/perfil.html', {'form': form})
+        template = get_template("boletines_app/boletin_general_pdf.html")
+        html = template.render(context)
 
-@login_required
-def boletin_view(request, trimestre='1T'):
-    if not hasattr(request.user, 'boletin_data'):
-        messages.warning(request, 'No hay datos de boletines disponibles')
-        return redirect('perfil')
-    
-    boletin = request.user.boletin_data.get(trimestre, {})
-    
-    return render(request, 'boletines_app/boletin.html', {
-        'boletin': boletin,
-        'trimestre_actual': trimestre,
-        'trimestres': ['1T', '2T', '3T']  # Lista de trimestres disponibles
-    }) """
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="boletin_{student.dni}.pdf"'
+
+        pisa_status = pisa.CreatePDF(
+            html,
+            dest=response,
+            link_callback=lambda uri, _: os.path.join(settings.MEDIA_ROOT, uri)
+        )
+
+        if pisa_status.err:
+            raise Exception(f"Error al generar PDF: {pisa_status.err}")
+
+        return response
+
+    except Exception as e:
+        print(f"Error en boletin_general_pdf: {str(e)}", file=sys.stderr)
+        return HttpResponse(f"Error al generar el PDF: {str(e)}", status=500)

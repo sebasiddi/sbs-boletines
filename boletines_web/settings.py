@@ -152,6 +152,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'boletines_app.Estudiante'
 
+CSRF_TRUSTED_ORIGINS = ['https://stepbystepbarracas.com']
 
 
 

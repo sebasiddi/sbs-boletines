@@ -4,6 +4,9 @@
 <h2>Boletín {{ trimestre_actual }} - <span class="username">{{ user.first_name }}</span></h2>
 
 
+<!-- <a href="{% url 'descargar-general-pdf' %}" class="btn btn-primary" target="_blank">
+    Descargar PDF
+</a> -->
 <div class="btn-group mb-4">
     {% for t in trimestres %}
     <a href="{% url 'boletin_trimestre' t %}" 
