@@ -13,4 +13,30 @@
 
 .username {
   text-transform: capitalize;
+}
+
+.loginHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+.loginHero .logomain {
+  height: 25vh;
+  width: auto;
+}
+
+@media (max-width: 767px) {
+  .loginHero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+  .loginHero .logomain {
+    height: auto;
+    width: 80vw;
+  }
 }/*# sourceMappingURL=main.css.map */
