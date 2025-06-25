@@ -86,18 +86,16 @@ LABELS_KINDER = {
 }
 ORDEN_TRIMESTRES = ['1T', '2T', '3T']
 @login_required
+
+
+
 def boletin_view(request, trimestre=None):
     estudiante = request.user
-    boletin_data = estudiante.boletin_data or {}
+    boletin_completo = estudiante.boletin_data or {}
 
-    # Obtener el nombre del curso (asumimos que solo tiene uno)
-    nombre_curso = list(boletin_data.keys())[0] if boletin_data else "Sin curso"
-
-    # Accedemos al contenido del curso
-    boletin_completo = boletin_data.get(nombre_curso, {})
-
-    # Filtrar solo trimestres con contenido útil
+    # Filtrar solo trimestres con contenido útil (más allá de DNI, STUDENT, etc.)
     def tiene_info(tr_data):
+        # Ignoramos claves técnicas, solo dejamos si hay notas o contenido
         datos = {k: v for k, v in tr_data.items() if k not in ['DNI', 'STUDENT', 'TEACHER']}
         return any(v not in [None, '', '-', '-nohay-', 'falta'] for v in datos.values())
 
@@ -119,7 +117,6 @@ def boletin_view(request, trimestre=None):
     excluir = ['DNI', 'STUDENT', 'TEACHER']
     boletin = {k: v for k, v in boletin_raw.items() if k not in excluir}
 
-    # Adaptar formato según nivel
     if estudiante.formato_boletin == "kinder":
         LABELS_KINDER_SIGLAS = {
             "WP": "Written Production",
@@ -141,7 +138,6 @@ def boletin_view(request, trimestre=None):
         template_name = "boletines_app/boletin_general.html"
 
     return render(request, template_name, {
-        "curso": nombre_curso,
         "boletin": boletin_con_etiquetas,
         "trimestres": trimestres,
         "trimestre_actual": trimestre_actual,
