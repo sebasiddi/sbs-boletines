@@ -114,7 +114,7 @@ def boletin_view(request, trimestre=None):
     boletin_raw = boletin_completo.get(trimestre_actual, {}) if trimestre_actual else {}
 
     # Excluir campos no mostrables
-    excluir = ['DNI', 'STUDENT', 'TEACHER']
+    excluir = ['DNI', 'STUDENT']
     boletin = {k: v for k, v in boletin_raw.items() if k not in excluir}
 
     if estudiante.formato_boletin == "kinder":
@@ -128,17 +128,92 @@ def boletin_view(request, trimestre=None):
             "CLASSES": "Total Classes",
             "ABSENT": "Days Absent",
         }
-        boletin_con_etiquetas = {
+        """ boletin_con_etiquetas = {
             LABELS_KINDER_SIGLAS.get(k.upper(), k.replace("_", " ").title()): v
             for k, v in boletin.items()
-        }
+        } """
+        boletin_con_etiquetas = boletin  # dejamos las claves técnicas
         template_name = "boletines_app/boletin_kinder.html"
     else:
-        boletin_con_etiquetas = boletin
+        boletin_con_etiquetas = boletin  # mantenemos claves técnicas
+
         template_name = "boletines_app/boletin_general.html"
 
+    # Orden para niveles generales
+    orden_general = ['WT', 'OT', 'PP', 'BE','PIN', 'HM', 'RP', 'PIN', 'CLASSES', 'ABSENT',  'TEACHER']
+    # Orden para kinder
+    orden_kinder = ['WP', 'SR', 'FC', 'FD', 'CT', 'CIC', 'ABSENT', 'CLASSES']
+
+    orden = orden_kinder if estudiante.formato_boletin == "kinder" else orden_general
+
+    """ boletin_ordenado = [(k, boletin_con_etiquetas.get(k)) for k in orden if k in boletin_con_etiquetas] """
+
+    # Campos que queremos que estén siempre al final
+    campos_finales = ['CLASSES', 'ABSENT', 'TEACHER']
+
+    # 1. Primero agregamos los campos del orden definido, excluyendo los que van al final
+    boletin_ordenado = [
+        (k, boletin_con_etiquetas.get(k))
+        for k in orden
+        if k in boletin_con_etiquetas and k not in campos_finales
+    ]
+
+    # 2. Luego agregamos los que no estaban en el orden (como CONTENIDO 1, etc.)
+    otros_campos = [
+        (k, v) for k, v in boletin_con_etiquetas.items()
+        if k not in dict(boletin_ordenado) and k not in campos_finales
+    ]
+    boletin_ordenado += otros_campos
+
+    # 3. Finalmente agregamos los campos administrativos al final
+    finales = [
+        (k, boletin_con_etiquetas.get(k))
+        for k in campos_finales
+        if k in boletin_con_etiquetas
+    ]
+    boletin_ordenado += finales
+
+
+
+    labels_generales = {
+        "WT": "Written Test",
+        "OT": "Oral Test",
+        "PP": "Practice Paper",
+        "BE": "Behaviour",
+        "PIN": "Participation in Class",
+        "HM": "Homework",
+        "RP": "Relationship with partners",
+        "ABSENT": "Absent",
+        "CLASSES": "Classes",
+        "TEACHER": "Teacher",
+    }
+    labels_kinder = {
+        "WP": "Works and Plays Well with Others",
+        "SR": "Shows Respect for Others",
+        "FC": "Follow Classroom Rules",
+        "FD": "Follows Directions",
+        "CT": "Completes Tasks in Appropriate Time",
+        "CIC": "Cooperates in Class Routine",
+        "CLASSES": "Total Classes",
+        "ABSENT": "Days Absent",
+    }
+
+    for i in range(1, 6):
+        labels_kinder[f"CONTENIDO {i}"] = f"Contenido {i}"
+
+
+    labels = labels_kinder if estudiante.formato_boletin == "kinder" else labels_generales
+    # Convertir valores a enteros si corresponde para ABSENT y CLASSES
+    boletin_ordenado = [
+        (k, int(v) if k in ['ABSENT', 'CLASSES'] and isinstance(v, (int, float)) and v is not None else v)
+        for k, v in boletin_ordenado
+    ]
+
     return render(request, template_name, {
-        "boletin": boletin_con_etiquetas,
+        "boletin_ordenado": boletin_ordenado,
+        "etiquetas": labels,
         "trimestres": trimestres,
         "trimestre_actual": trimestre_actual,
     })
+
+

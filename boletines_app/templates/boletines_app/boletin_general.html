@@ -1,44 +1,24 @@
 {% extends 'boletines_app/base.html' %}
+{% load etiquetas_extras %}
 
 {% block content %}
 <h2>Boletín {{ trimestre_actual }} - <span class="username">{{ user.first_name }}</span></h2>
 
-
-
 <div class="btn-group mb-4">
     {% for t in trimestres %}
     <a href="{% url 'boletin_trimestre' t %}" 
-    class="btn {% if t == trimestre_actual %}btn-primary{% else %}btn-outline-primary{% endif %}">
-    {{ t }}
-
+       class="btn {% if t == trimestre_actual %}btn-primary{% else %}btn-outline-primary{% endif %}">
+        {{ t }}
     </a>
     {% endfor %}
 </div>
+
 <div class="card">
     <div class="card-body">
         <table class="table">
-            {% for key, value in boletin.items %}
+            {% for key, value in boletin_ordenado %}
             <tr>
-                <th>
-                    {% if key == 'WT' %}
-                        <span>Written Test</span>
-                    {% elif key == 'OT' %}
-                        <span>Oral Test</span>
-                    {% elif key == 'PP' %}
-                        <span>Practice Paper</span>
-                    {% elif key == 'BE' %}
-                        <span>Behaviour</span>
-                    {% elif key == 'PIN' %}
-                        <span>Participation in Class</span>
-                    {% elif key == 'HM' %}
-                        <span>Homework</span>
-                    {% elif key == 'RP' %}
-                        <span>Relationship with partners</span>
-                    {% else %}
-                        {{ key }}
-                    {% endif %}
-
-                </th>
+                <th>{{ etiquetas|get_item:key|default:key }}</th>
                 <td>
                     {% if value == 'exc' %}
                         <span class="badge bg-success">Excelente</span>

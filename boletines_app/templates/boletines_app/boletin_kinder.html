@@ -1,55 +1,35 @@
 {% extends 'boletines_app/base.html' %}
+{% load etiquetas_extras %}
 
 {% block content %}
-<h2>Boletín {{ trimestre_actual }} – {{ user.first_name }}</h2>
+<h2>Boletín {{ trimestre_actual }} - <span class="username">{{ user.first_name }}</span></h2>
 
 <div class="btn-group mb-4">
     {% for t in trimestres %}
-    <a href="{% url 'boletin_trimestre' t %}" 
-       class="btn {% if t == trimestre_actual %}btn-primary{% else %}btn-outline-primary{% endif %}">
-        {{ t }}
-    </a>
+        <a href="{% url 'boletin_trimestre' t %}" 
+           class="btn {% if t == trimestre_actual %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            {{ t }}
+        </a>
     {% endfor %}
 </div>
+
 <div class="card">
     <div class="card-body">
-        <table class="table table-striped">
-            {% for key, valor in boletin.items %}
+        <table class="table">
+            {% for key, value in boletin_ordenado %}
             <tr>
-<!--                 <th>{{ etiqueta }}</th>
- -->                    <th>
-                    {% if key == 'Wt' %}
-                        <span>Written Test</span>
-                    {% elif key == 'Ot' %}
-                        <span>Oral Test</span>
-                    {% elif key == 'Pp' %}
-                        <span>Practice Paper</span>
-                    {% elif key == 'Be' %}
-                        <span>Behaviour</span>
-                    {% elif key == 'Pin' %}
-                        <span>Participation in Class</span>
-                    {% elif key == 'Hm' %}
-                        <span>Homework</span>
-                    {% elif key == 'Rp' %}
-                        <span>Relationship with partners</span>
-                    {% else %}
-                        {{ key }}
-                    {% endif %}
-
-                </th>
+                <th>{{ etiquetas|get_item:key|default:key }}</th>
                 <td>
-                    {% if valor == 'exc' %}
+                    {% if value == 'exc' %}
                         <span class="badge bg-success">Excelente</span>
-                    {% elif valor == 'mb' %}
-                        <span class="badge bg-primary">Muy Bien</span>
-                    {% elif valor == 'b' %}
-                        <span class="badge bg-info">Bien</span>
-                    {% elif valor == 'r' %}
-                        <span class="badge bg-warning text-dark">Regular</span>
-                    {% elif valor == '-' %}
-                        <span class="badge bg-secondary">-</span>
+                    {% elif value == 'falta' %}
+                        <span class="badge bg-warning">Falta</span>
+                    {% elif value == '-nohay-' %}
+                        <span class="badge bg-secondary">No hay</span>
+                    {% elif value == None %}
+                        <span class="badge bg-secondary">Sin nota</span>
                     {% else %}
-                        {{ valor }}
+                        {{ value }}
                     {% endif %}
                 </td>
             </tr>
