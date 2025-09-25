@@ -18,20 +18,31 @@
         <table class="table">
             {% for key, value in boletin_ordenado %}
             <tr>
-                <th>{{ etiquetas|get_item:key|default:key }}</th>
+                <th>{{ key|label_boletin:etiquetas }}</th>
+
                 <td>
                     {% if value == 'exc' %}
                         <span class="badge bg-success">Excelente</span>
                     {% elif value == 'Excelent' %}
                         <span class="badge bg-success">Excellent</span>
+                    {% elif value == 'Excellent' %}
+                        <span class="badge bg-success">Excellent</span>
+                    {% elif value == 'Very Good' %}
+                        <span class="badge bg-info">Very Good</span>
                     {% elif value == 'falta' %}
-                        <span class="badge bg-warning">Falta</span>
+                        <span class="badge bg-danger">Falta</span>
+                    {% elif value == 'Fair' %}
+                        <span class="badge bg-danger">Falta</span>
+                    {% elif value == 'Improvement Needed' %}
+                        <span class="badge bg-warning">Improvement Needed</span>
+                    {% elif value == 'Good' %}
+                        <span class="badge bg-warning">Good</span>
                     {% elif value == '-nohay-' %}
                         <span class="badge bg-secondary">No hay</span>
                     {% elif value == None %}
                         <span class="badge bg-secondary">Sin nota</span>
                     {% else %}
-                        {{ value }}
+                        {{ value|floatformat:"-2" }}
                     {% endif %}
                 </td>
             </tr>

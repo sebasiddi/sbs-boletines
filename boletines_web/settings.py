@@ -68,8 +68,13 @@ WSGI_APPLICATION = 'boletines_web.wsgi.application'
 
 # Base de datos
 DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,      # pooling
+        ssl_require=True       # fuerza SSL si la URL no trae ?sslmode=require
+    )
 }
+
 
 # Validación de contraseñas
 AUTH_PASSWORD_VALIDATORS = [
@@ -81,7 +86,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internacionalización
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = "America/Argentina/Buenos_Aires"
 USE_I18N = True
 USE_TZ = True
 
@@ -97,8 +102,10 @@ AUTH_USER_MODEL = 'boletines_app.Estudiante'
 # Seguridad CSRF
 CSRF_TRUSTED_ORIGINS = [
     'https://stepbystepbarracas.com.ar',
-    'https://www.stepbystepbarracas.com.ar'
+    'https://www.stepbystepbarracas.com.ar',
+    'https://*.onrender.com',  # ← agregar esto
 ]
+
 
 # Redirecciones de login
 LOGIN_URL = 'login'

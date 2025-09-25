@@ -1,4 +1,4 @@
-import json
+""" import json
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from boletines_app.models import Estudiante
@@ -30,7 +30,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.NOTICE('Cargando datos desde boletines_250622_actualizado.json...'))
 
-        with open('boletines_DNI_string_limpio.json', encoding='utf-8') as f:
+        with open('boletines_actualizado_20250921.json', encoding='utf-8') as f:
             data = json.load(f)
 
         for curso, trimestres in data.items():
@@ -60,3 +60,4 @@ class Command(BaseCommand):
                     estudiante.save()
 
         self.stdout.write(self.style.SUCCESS('✅ Todos los boletines fueron cargados correctamente.'))
+ """

@@ -1,4 +1,4 @@
-import json
+""" import json
 from django.core.management.base import BaseCommand
 from django.contrib.auth.hashers import make_password
 from boletines_app.models import Estudiante
@@ -25,43 +25,58 @@ FORMATO_POR_CURSO = {
 }
 
 class Command(BaseCommand):
-    help = 'Sobrescribe completamente los boletines desde JSON sin tocar las contraseñas'
+    help = 'Carga/actualiza boletines desde JSON acumulando 1T/2T/3T (no toca contraseñas)'
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.NOTICE('Sobrescribiendo boletines desde boletines_250622_actualizado_sin_nan.json...'))
+        self.stdout.write(self.style.NOTICE(
+            'Cargando boletines desde boletines_actualizado_20250921.json...'
+        ))
 
-        with open('boletines_DNI_string_limpio.json', encoding='utf-8') as f:
+        # El archivo está junto a manage.py (directorio de ejecución)
+        with open('boletines_actualizado_20250921.json', encoding='utf-8') as f:
             data = json.load(f)
 
+        total_creados = total_actualizados = 0
+
         for curso, trimestres in data.items():
-            formato = FORMATO_POR_CURSO.get(curso, 'general')
+            curso_norm = str(curso).strip().upper()
+            formato = FORMATO_POR_CURSO.get(curso_norm, 'general')
+
             for trimestre, estudiantes in trimestres.items():
                 for estudiante_data in estudiantes:
-                    dni = estudiante_data.get('DNI')
-                    if not dni:
-                        continue
+                    dni = str(estudiante_data.get('DNI') or '').strip()
+                    if not dni or dni.lower() == 'null':
+                        continue  # descarta filas vacías/placeholder
 
-                    # Obtener o crear
                     estudiante, creado = Estudiante.objects.get_or_create(dni=dni)
 
-                    # Setear campos comunes
-                    estudiante.username = str(dni)
-                    estudiante.first_name = estudiante_data.get('STUDENT', '')
+                    # Campos básicos
+                    estudiante.username = dni
+                    first_name = str(estudiante_data.get('STUDENT') or '').strip()
+                    if first_name and first_name.lower() != 'null':
+                        estudiante.first_name = first_name
                     estudiante.formato_boletin = formato
 
+                    # ✅ ACUMULAR: agregar/actualizar el trimestre sin borrar los otros
+                    boletin = estudiante.boletin_data or {}
+                    boletin[trimestre] = estudiante_data
+                    estudiante.boletin_data = boletin
+
                     if creado:
-                        estudiante.password = make_password(str(dni))
-                        self.stdout.write(self.style.SUCCESS(f'✔ Usuario creado: {dni}'))
-                        estudiante.boletin_data = {
-                            trimestre: estudiante_data
-                        }
+                        estudiante.password = make_password(dni)
+                        total_creados += 1
+                        self.stdout.write(self.style.SUCCESS(
+                            f'✔ Usuario creado: {dni} (set {trimestre})'
+                        ))
                     else:
-                        # Reescribe boletin_data completamente, con un nuevo diccionario
-                        nuevo_boletin = {}
-                        nuevo_boletin[trimestre] = estudiante_data
-                        estudiante.boletin_data = nuevo_boletin
-                        self.stdout.write(self.style.WARNING(f'↺ Usuario actualizado (boletín sobrescrito): {dni}'))
+                        total_actualizados += 1
+                        self.stdout.write(self.style.WARNING(
+                            f'↺ Usuario actualizado: {dni} (set {trimestre})'
+                        ))
 
                     estudiante.save()
 
-        self.stdout.write(self.style.SUCCESS('✅ Boletines sobrescritos correctamente.'))
+        self.stdout.write(self.style.SUCCESS(
+            f'✅ Proceso finalizado. Creados: {total_creados} | Actualizados: {total_actualizados}'
+        ))
+ """

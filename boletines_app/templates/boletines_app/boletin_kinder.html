@@ -16,24 +16,36 @@
 <div class="card">
     <div class="card-body">
         <table class="table">
-            {% for key, value in boletin_ordenado %}
-            <tr>
-                <th>{{ etiquetas|get_item:key|default:key }}</th>
-                <td>
-                    {% if value == 'exc' %}
-                        <span class="badge bg-success">Excelente</span>
-                    {% elif value == 'falta' %}
-                        <span class="badge bg-warning">Falta</span>
-                    {% elif value == '-nohay-' %}
-                        <span class="badge bg-secondary">No hay</span>
-                    {% elif value == None %}
-                        <span class="badge bg-secondary">Sin nota</span>
-                    {% else %}
-                        {{ value }}
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+        {% for key, value in boletin_ordenado %}
+        <tr>
+          {% smart_label key value etiquetas grupo_actual contenidos_map as nice_label %}
+          <th>{{ nice_label|normalize_label }}</th>
+
+          <td>
+            {% if value == 'exc' %}
+              <span class="badge bg-success">Excelente</span>
+            {% elif value == 'Excelent' or value == 'Excellent' %}
+              <span class="badge bg-success">Excellent</span>
+            {% elif value == 'Very Good' %}
+              <span class="badge bg-info">Very Good</span>
+            {% elif value == 'falta' or value == 'Fair' %}
+              <span class="badge bg-danger">Falta</span>
+            {% elif value == 'Improvement Needed' %}
+              <span class="badge bg-warning">Improvement Needed</span>
+            {% elif value == '-nohay-' or value == None %}
+              <span class="badge bg-secondary">Sin nota</span>
+            {% else %}
+              {% with n=value|nota_numeric %}
+                {% if n is not None %}
+                  {{ n|floatformat:"-1" }}
+                {% else %}
+                  {{ value }}
+                {% endif %}
+              {% endwith %}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
         </table>
     </div>
 </div>
