@@ -98,27 +98,155 @@ def _to_int_if_number(v):
     except Exception:
         return v
 
+
 @login_required
 def boletin_view(request, trimestre=None):
     estudiante = request.user
     boletin_completo = estudiante.boletin_data or {}
 
+    # Filtrar solo trimestres con contenido útil (más allá de DNI, STUDENT, etc.)
     def tiene_info(tr_data):
         datos = {k: v for k, v in tr_data.items() if k not in ['DNI', 'STUDENT', 'TEACHER']}
         return any(v not in [None, '', '-', '-nohay-', 'falta'] for v in datos.values())
 
-    ORDEN_TRIMESTRES = ['1T', '2T', '3T']
     trimestres_validos = {k: v for k, v in boletin_completo.items() if tiene_info(v)}
-    trimestres = sorted(trimestres_validos.keys(),
-                        key=lambda t: ORDEN_TRIMESTRES.index(t) if t in ORDEN_TRIMESTRES else 99)
 
+    # Ordenar trimestres válidos como 1T, 2T, 3T
+    trimestres = sorted(
+        trimestres_validos.keys(),
+        key=lambda t: ORDEN_TRIMESTRES.index(t) if t in ORDEN_TRIMESTRES else 99
+    )
+
+    # Elegir trimestre a mostrar
     trimestre_actual = trimestre or (trimestres[0] if trimestres else None)
     boletin_raw = boletin_completo.get(trimestre_actual, {}) if trimestre_actual else {}
 
-    excluir = ['DNI', 'STUDENT']
+    # Excluir campos no mostrables
+    excluir = ['DNI', 'STUDENT']  # TEACHER se muestra al final
     boletin = {k: v for k, v in boletin_raw.items() if k not in excluir}
 
-    # Plantilla + labels base
+    # ¿Vista/plantilla según formato?
+    if estudiante.formato_boletin == "kinder":
+        labels_kinder = {
+            "WP": "Works and Plays Well with Others",
+            "SR": "Shows Respect for Others",
+            "FC": "Follow Classroom Rules",
+            "FD": "Follows Directions",
+            "CT": "Completes Tasks in Appropriate Time",
+            "CIC": "Cooperates in Class Routine",
+            "CLASSES": "Total Classes",
+            "ABSENT": "Days Absent",
+        }
+        boletin_con_etiquetas = boletin  # mantenemos claves técnicas; los template tags las traducen
+        template_name = "boletines_app/boletin_kinder.html"
+    else:
+        labels_generales = {
+            "WT": "Written Test",
+            "OT": "Oral Test",
+            "PP": "Practice Paper",
+            "BE": "Behaviour",
+            "PIN": "Participation in Class",
+            "HM": "Homework",
+            "RP": "Relationship with partners",
+            "ABSENT": "Absent",
+            "CLASSES": "Classes",
+            "TEACHER": "Teacher",
+        }
+        boletin_con_etiquetas = boletin
+        template_name = "boletines_app/boletin_general.html"
+
+    # Orden para niveles generales y kinder
+    # ---- ORDEN ROBUSTO (reemplaza tu bloque de orden actual) ----
+    orden_general = ['WT', 'OT', 'PP', 'BE', 'PIN', 'HM', 'RP', 'CLASSES', 'ABSENT', 'TEACHER']
+    orden_kinder  = ['WP', 'SR', 'FC', 'FD', 'CT', 'CIC', 'ABSENT', 'CLASSES']
+    orden = orden_kinder if estudiante.formato_boletin == "kinder" else orden_general
+
+    campos_finales = ['CLASSES', 'ABSENT', 'TEACHER']
+
+    import re
+    def _norm(x): return str(x).strip().upper()
+    def _contenido_num(k):
+        m = re.match(r'CONTENIDO\s+(\d+)', _norm(k))
+        return int(m.group(1)) if m else None
+
+# Mapa normalizado->clave_real presente en boletin
+    norm_map = {}
+    for k in boletin.keys():
+        nk = _norm(k)
+    # si hay duplicados normalizados, conservamos la primera aparición
+        if nk not in norm_map:
+            norm_map[nk] = k
+
+    boletin_ordenado = []
+    usados = set()
+
+    # 1) primeros según orden deseado (excluyendo finales)
+    for code in orden:
+        if code in campos_finales:
+            continue
+        real_key = norm_map.get(_norm(code))
+        if real_key is not None and real_key not in usados:
+            boletin_ordenado.append((real_key, boletin.get(real_key)))
+            usados.add(real_key)
+
+# 2) luego el resto (p.ej. CONTENIDO 1..N). En Kinder los ordenamos por número.
+    otros = [
+        (k, v) for k, v in boletin.items()
+        if k not in usados and _norm(k) not in {_norm(c) for c in campos_finales}
+    ]
+
+    if estudiante.formato_boletin == "kinder":
+        # ordenar CONTENIDO N por N, dejando lo demás al final
+        otros.sort(key=lambda kv: (_contenido_num(kv[0]) is None,
+                                   999 if _contenido_num(kv[0]) is None else _contenido_num(kv[0]),
+                                   str(kv[0])))
+
+    boletin_ordenado += otros
+
+# 3) finalmente los campos administrativos en orden fijo
+    for code in campos_finales:
+        real_key = norm_map.get(_norm(code))
+        if real_key is not None and real_key not in usados:
+            boletin_ordenado.append((real_key, boletin.get(real_key)))
+            usados.add(real_key)
+# ---- FIN ORDEN ROBUSTO ----
+
+
+    # --------- NUEVO: grupo_actual + contenidos_map para KIDS 4 ----------
+    # Intentamos deducir el grupo/curso del estudiante de forma robusta
+    grupo_actual = (
+        getattr(estudiante, "grupo", None)
+        or getattr(estudiante, "curso", None)
+        or getattr(estudiante, "classroom", None)
+        or getattr(estudiante, "division", None)
+        or ""
+    )
+    grupo_upper = str(grupo_actual).upper() if grupo_actual else ""
+
+    contenidos_map = {
+        # Permito alias para robustez:
+        "KINDER 4": {
+            "CONTENIDO 1": "Greetings",
+            "CONTENIDO 2": "Weather",
+            "CONTENIDO 3": "Colours",
+            "CONTENIDO 4": "Numbers",
+            "CONTENIDO 5": "Toys",
+            "CONTENIDO 6": "Body parts",
+            "CONTENIDO 7": "Pets",
+        },
+        "K4": {
+            "CONTENIDO 1": "Greetings",
+            "CONTENIDO 2": "Weather",
+            "CONTENIDO 3": "Colours",
+            "CONTENIDO 4": "Numbers",
+            "CONTENIDO 5": "Toys",
+            "CONTENIDO 6": "Body parts",
+            "CONTENIDO 7": "Pets",
+        },
+    }
+    # --------------------------------------------------------------------
+
+    # Labels a pasar al template (según formato)
     if estudiante.formato_boletin == "kinder":
         labels = {
             "WP": "Works and Plays Well with Others",
@@ -130,7 +258,7 @@ def boletin_view(request, trimestre=None):
             "CLASSES": "Total Classes",
             "ABSENT": "Days Absent",
         }
-        template_name = "boletines_app/boletin_kinder.html"
+        # (No forzamos "Contenido N" acá: lo resuelve smart_label con contenidos_map)
     else:
         labels = {
             "WT": "Written Test",
@@ -144,90 +272,13 @@ def boletin_view(request, trimestre=None):
             "CLASSES": "Classes",
             "TEACHER": "Teacher",
         }
-        template_name = "boletines_app/boletin_general.html"
-
-    # Orden
-    orden_general = ['WT', 'OT', 'PP', 'BE', 'PIN', 'HM', 'RP', 'PIN', 'CLASSES', 'ABSENT', 'TEACHER']
-    orden_kinder  = ['WP', 'SR', 'FC', 'FD', 'CT', 'CIC', 'ABSENT', 'CLASSES']
-    orden = orden_kinder if estudiante.formato_boletin == "kinder" else orden_general
-    campos_finales = ['CLASSES', 'ABSENT', 'TEACHER']
-
-    boletin_ordenado = [
-        (k, boletin.get(k))
-        for k in orden
-        if k in boletin and k not in campos_finales
-    ]
-    otros_campos = [(k, v) for k, v in boletin.items()
-                    if k not in dict(boletin_ordenado) and k not in campos_finales]
-    boletin_ordenado += otros_campos
-    finales = [(k, boletin.get(k)) for k in campos_finales if k in boletin]
-    boletin_ordenado += finales
-
-    def _to_int_if_number(v):
-        if v is None: return v
-        try:
-            return int(float(str(v).replace(',', '.').strip()))
-        except Exception:
-            return v
-    boletin_ordenado = [
-        (k, _to_int_if_number(v) if k in ['ABSENT', 'CLASSES'] else v)
-        for k, v in boletin_ordenado
-    ]
-
-    # -------- mapa de contenidos y detección automática de KIDS 4 --------
-    # 1) Intentar leer grupo del modelo
-    grupo_actual = (
-        getattr(estudiante, "grupo", None)
-        or getattr(estudiante, "curso", None)
-        or getattr(estudiante, "classroom", None)
-        or getattr(estudiante, "division", None)
-        or ""
-    )
-    grupo_upper = str(grupo_actual).upper() if grupo_actual else ""
-
-    # 2) Si no hay grupo claro pero es KINDER y hay CONTENIDO 1..7 → asumir KIDS 4
-    if estudiante.formato_boletin == "kinder" and not grupo_upper:
-        claves = {k.upper() for k, _ in boletin_ordenado}
-        if all(f"CONTENIDO {i}" in claves for i in range(1, 8)):  # 1..7 presentes
-            grupo_upper = "KIDS 4"
-
-    contenidos_map = {
-        "KIDS 4": {
-            "CONTENIDO 1": "Greetings",
-            "CONTENIDO 2": "Weather",
-            "CONTENIDO 3": "Colours",
-            "CONTENIDO 4": "Numbers",
-            "CONTENIDO 5": "Toys",
-            "CONTENIDO 6": "Body parts",
-            "CONTENIDO 7": "Pets",
-        },
-        "KINDER 4": {  # alias por si tu modelo usa otro nombre
-            "CONTENIDO 1": "Greetings",
-            "CONTENIDO 2": "Weather",
-            "CONTENIDO 3": "Colours",
-            "CONTENIDO 4": "Numbers",
-            "CONTENIDO 5": "Toys",
-            "CONTENIDO 6": "Body parts",
-            "CONTENIDO 7": "Pets",
-        },
-        "K4": {       # otro alias
-            "CONTENIDO 1": "Greetings",
-            "CONTENIDO 2": "Weather",
-            "CONTENIDO 3": "Colours",
-            "CONTENIDO 4": "Numbers",
-            "CONTENIDO 5": "Toys",
-            "CONTENIDO 6": "Body parts",
-            "CONTENIDO 7": "Pets",
-        },
-    }
-    # --------------------------------------------------------------------
 
     return render(request, template_name, {
         "boletin_ordenado": boletin_ordenado,
         "etiquetas": labels,
         "trimestres": trimestres,
         "trimestre_actual": trimestre_actual,
-        # claves para smart_label
+        # nuevo para que el template renombre "Contenido N"
         "grupo_actual": grupo_upper,
         "contenidos_map": contenidos_map,
     })

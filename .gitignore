@@ -38,7 +38,7 @@ db.sqlite3
 db_backup_*.sqlite3
 *.xlsx
 boletines_app/data/*.json
-
+backups/**
 # Archivos de compilación
 /staticfiles/
 boletines_legacy.json
