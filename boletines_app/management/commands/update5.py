@@ -1,5 +1,7 @@
-# boletines_app/management/commands/update4.py
+# boletines_app/management/commands/update5.py
 import json, math, re
+from pathlib import Path
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.hashers import make_password
 from boletines_app.models import Estudiante
@@ -37,8 +39,7 @@ def parse_dni(val):
     s = str(val).strip().lower()
     if s in {"", "nan", "null", "none"}:
         return None
-    # quedarnos sólo con dígitos (por si vino "58.872.952" o "58872952.0")
-    digits = re.sub(r"\D+", "", s)
+    digits = re.sub(r"\D+", "", s)  # ej: '58.872.952' -> '58872952'
     if not digits:
         return None
     return int(digits)
@@ -58,7 +59,7 @@ def clean_json(obj):
     return str(obj)
 
 def to_valid_json_obj(py_obj):
-    """Limpia y fuerza JSON estándar (sin NaN) usando dumps(..., allow_nan=False)."""
+    """Fuerza JSON estándar sin NaN usando dumps(..., allow_nan=False)."""
     cleaned = clean_json(py_obj)
     s = json.dumps(cleaned, ensure_ascii=False, allow_nan=False)
     return json.loads(s)
@@ -66,14 +67,26 @@ def to_valid_json_obj(py_obj):
 class Command(BaseCommand):
     help = "Carga/actualiza boletines: combina 1T/2T/3T por DNI (plano) con JSON válido y DNIs saneados."
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--json",
+            dest="json_path",
+            default=None,
+            help="Ruta del JSON a cargar. Si se omite, busca un JSON por defecto junto a manage.py.",
+        )
+
     def handle(self, *args, **options):
-        fname = "boletines_actualizado_20250921.json"
-        self.stdout.write(self.style.NOTICE(f"Cargando: {fname}"))
+        # Default: archivo junto a manage.py (BASE_DIR apunta al proyecto)
+        default_json = Path(settings.BASE_DIR) / "boletines_actualizado_20251222_desde_excel.json"
+        json_path = Path(options["json_path"]) if options.get("json_path") else default_json
+
+        if not json_path.exists():
+            raise CommandError(f"No se encontró {json_path.name} junto a manage.py (buscado en: {json_path})")
+
+        self.stdout.write(self.style.NOTICE(f"Cargando: {json_path}"))
         try:
-            with open(fname, encoding="utf-8") as f:
+            with open(json_path, encoding="utf-8") as f:
                 data = json.load(f)
-        except FileNotFoundError:
-            raise CommandError(f"No se encontró {fname} junto a manage.py")
         except Exception as e:
             raise CommandError(f"No se pudo leer/parsear JSON: {e}")
 
@@ -90,7 +103,6 @@ class Command(BaseCommand):
                     dni_int = parse_dni(row.get("DNI"))
                     if dni_int is None:
                         skip_count += 1
-                        # Logueamos suave: filas placeholder con "DNI":"null" o NaN
                         continue
 
                     try:
@@ -104,15 +116,13 @@ class Command(BaseCommand):
 
                     dni_key = str(dni_int)
                     entry = por_dni.setdefault(dni_key, {"formato": formato, "first_name": "", "trimestres": {}})
-
                     if not entry["first_name"]:
                         fn = str(row.get("STUDENT") or "").strip()
                         if fn and fn.lower() != "null":
                             entry["first_name"] = fn
-
                     entry["trimestres"][trimestre] = row_clean
 
-        # 2) Escribir a DB (una sola vez por alumno), boleta JSON validado
+        # 2) Volcar a DB (una sola vez por alumno)
         creados = actualizados = 0
         for dni_str, payload in por_dni.items():
             try:
@@ -129,19 +139,16 @@ class Command(BaseCommand):
             if payload["first_name"]:
                 est.first_name = payload["first_name"]
             est.formato_boletin = payload["formato"]
-            est.boletin_data = boletin_valido  # JSON ya validado
+            est.boletin_data = boletin_valido  # {'1T': {...}, '2T': {...}, '3T': {...}}
 
             if creado:
                 est.password = make_password(dni_str)
                 creados += 1
-                self.stdout.write(self.style.SUCCESS(
-                    f"✔ Creado {dni_str} ({list(boletin_valido.keys())})"
-                ))
+                self.stdout.write(self.style.SUCCESS(f"✔ Creado {dni_str} ({list(boletin_valido.keys())})"))
             else:
                 actualizados += 1
-                self.stdout.write(self.style.WARNING(
-                    f"↺ Actualizado {dni_str} ({list(boletin_valido.keys())})"
-                ))
+                self.stdout.write(self.style.WARNING(f"↺ Actualizado {dni_str} ({list(boletin_valido.keys())})"))
+
             est.save()
 
         self.stdout.write(self.style.SUCCESS(

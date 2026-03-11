@@ -1,20 +1,16 @@
 {% extends "boletines_app/base.html" %}
+{% load static %}
 
 {% block content %}
-{% load static %}
-<div class="loginHero">
 
-    <img class="logomain" src="{% static 'boletines_app/img/s.png' %}" alt="mainlogo" >
-    
-    <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-Iniciar Sesión</button>
+{% include "boletines_app/components/landing_hero.html" %}
+{% include "boletines_app/components/landing_propuesta.html" %}
+{% include "boletines_app/components/landing_edades.html" %}
+{% include "boletines_app/components/landing_beneficios.html" %}
+{% include "boletines_app/components/landing_como_funciona.html" %}
+{% include "boletines_app/components/landing_contacto.html" %}
+{% include "boletines_app/components/landing_cta.html" %}
+{% include "boletines_app/components/landing_footer.html" %}
+{% include "boletines_app/components/cta_whatsapp.html" %}
 
-    
-    
-    <div class="row justify-content-center">
-        </div>
-    
-
-</div>
 {% endblock %}

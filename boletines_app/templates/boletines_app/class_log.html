@@ -1,0 +1,44 @@
+{% extends "boletines_app/base.html" %}
+
+{% block content %}
+<section class="classLog">
+  <header class="classLog__header">
+    <h1 class="classLog__title">Class Log</h1>
+    <p class="classLog__subtitle">Últimas clases y tareas</p>
+  </header>
+
+  <div class="classLog__list">
+    {# Ejemplo: logs = [{date, topic, homework, notes}] #}
+    {% for item in logs %}
+      <article class="classLog__card">
+        <div class="classLog__meta">
+          <span class="classLog__date">{{ item.date }}</span>
+          {% if item.created_by %}
+            <span class="classLog__by">· {{ item.created_by }}</span>
+          {% endif %}
+        </div>
+
+        <h2 class="classLog__topic">{{ item.topic }}</h2>
+
+        {% if item.homework %}
+          <div class="classLog__block">
+            <div class="classLog__label">Homework</div>
+            <div class="classLog__text">{{ item.homework }}</div>
+          </div>
+        {% endif %}
+
+        {% if item.notes %}
+          <div class="classLog__block">
+            <div class="classLog__label">Notes</div>
+            <div class="classLog__text">{{ item.notes }}</div>
+          </div>
+        {% endif %}
+      </article>
+    {% empty %}
+      <div class="classLog__empty">
+        Todavía no hay entradas en el log para este curso.
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

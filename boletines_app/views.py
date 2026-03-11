@@ -1,24 +1,74 @@
 # views.py
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.http import JsonResponse, HttpResponse
-from django.template.loader import get_template
-from django.templatetags.static import static
 from django.conf import settings
 
 from datetime import datetime
 import os
+import re
 
 from boletines_app.models import Estudiante
 
+# (lo usás para assets si querés)
 logo_path = os.path.join(settings.STATIC_ROOT, 'boletines_app/img/s.png')
 
+# -------------------------------------------------------------------
+# Helpers
+# -------------------------------------------------------------------
+ORDEN_TRIMESTRES = ['1T', '2T', '3T']
 
+def _to_int_if_number(v):
+    """Convierte a int si v es numérico (incluyendo '25' o '25,0'); si no, lo deja como está."""
+    if v is None:
+        return v
+    try:
+        return int(float(str(v).replace(',', '.').strip()))
+    except Exception:
+        return v
+
+def N(s: str) -> str:
+    """Normaliza: mayúsculas, colapsa espacios, quita signos de puntuación."""
+    s = re.sub(r'\s+', ' ', str(s).strip()).upper()
+    s = re.sub(r'[^A-Z0-9 ]', '', s)
+    return s.replace('  ', ' ')
+
+def contenido_num(k: str):
+    m = re.match(r'CONTENIDO\s+(\d+)', N(k))
+    return int(m.group(1)) if m else None
+
+# Sinónimos normalizados → grupos canónicos
+G = {
+    'WT': {N('WT'), N('Written Test')},
+    'OT': {N('OT'), N('Oral Test')},
+    'PP': {N('PP'), N('Practice Paper')},
+    'BE': {N('BE'), N('Behaviour'), N('Behavior')},
+    'PIN': {N('PIN'), N('Participation in Class')},
+    'HM': {N('HM'), N('Homework')},
+    'RP': {N('RP'), N('Relationship with partners'), N('Relationship With Partners')},
+    'CLASSES': {N('CLASSES'), N('Total Classes')},
+    'ABSENT': {N('ABSENT'), N('Days Absent')},
+    'TEACHER': {N('TEACHER'), N('Docente'), N('Teacher')},
+
+    # Kinder (por si alguna vez llegan como texto)
+    'WP': {N('WP'), N('Works and Plays Well with Others')},
+    'SR': {N('SR'), N('Shows Respect for Others')},
+    'FC': {N('FC'), N('Follow Classroom Rules')},
+    'FD': {N('FD'), N('Follows Directions')},
+    'CT': {N('CT'), N('Completes Tasks in Appropriate Time')},
+    'CIC': {N('CIC'), N('Cooperates in Class Routine')},
+}
+
+GENERAL_ORDER = ['WT', 'OT', 'PP', 'BE', 'PIN', 'HM', 'RP']
+FINAL_ORDER   = ['CLASSES', 'ABSENT', 'TEACHER']
+KINDER_ORDER  = ['WP', 'SR', 'FC', 'FD', 'CT', 'CIC']
+
+# -------------------------------------------------------------------
+# Auth / Perfil
+# -------------------------------------------------------------------
 @login_required
 def logout_view(request):
     logout(request)
@@ -31,7 +81,6 @@ def login_view(request):
         password = request.POST.get("password")
 
         try:
-            # Convertimos el valor a entero para evitar errores en IntegerField
             dni = int(dni_input)
         except (ValueError, TypeError):
             messages.error(request, "El DNI ingresado no es válido.")
@@ -51,6 +100,33 @@ def login_view(request):
 
     return render(request, "boletines_app/login.html")
 
+@login_required
+def class_log_view(request):
+    logs = [
+        {
+            "date": "2026-02-10",
+            "topic": "Present Simple: routines",
+            "homework": "Workbook p.12 ex 1–3",
+            "notes": "Bring your book next class",
+            "created_by": "Teacher Ana",
+        },
+        {
+            "date": "2026-02-07",
+            "topic": "Listening practice: daily activities",
+            "homework": "Audio track 3 + notes",
+            "notes": "",
+            "created_by": "Teacher Ana",
+        },
+    ]
+
+    return render(
+        request,
+        "boletines_app/class_log.html",
+        {
+            "logs": logs,
+        },
+    )
+
 
 @login_required
 def perfil_view(request):
@@ -65,69 +141,35 @@ def perfil_view(request):
         form = PasswordChangeForm(request.user)
     return render(request, 'boletines_app/perfil.html', {'form': form})
 
-
-# Etiquetas de apoyo (si las usás en algún otro lado)
-LABELS_KINDER = {
-    "PARTICIPACION": "Participación en clase",
-    "CONDUCTA": "Conducta",
-    "TAREA": "Tareas",
-    "VOCABULARIO": "Vocabulario",
-    "COMPRENSION": "Comprensión",
-    "EXPRESION": "Expresión",
-    "ASISTENCIA": "Asistencia",
-    "OBS": "Observaciones",
-    "WP": "WORKS AND PLAYS WELL WITH OTHERS",
-    "SR": "SHOWS RESPECT FOR OTHERS",
-    "FC": "FOLLOW CLASSROOM RULES",
-    "FD": "FOLLOWS DIRECTIONS",
-    "CT": "COMPLETES TASKS IN APPROPIATE AMOUNT OF TIME",
-    "CIC": "COOPERATE IN CLASS ROUTINE",
-    "CLASSES": "Total Classes",
-}
-
-ORDEN_TRIMESTRES = ['1T', '2T', '3T']
-
-
-def _to_int_if_number(v):
-    """Convierte v a int si es número (int/float/str numérica). Si no, lo deja igual."""
-    if v is None:
-        return v
-    try:
-        f = float(str(v).replace(',', '.').strip())
-        return int(f)
-    except Exception:
-        return v
-
-
+# -------------------------------------------------------------------
+# Boletín
+# -------------------------------------------------------------------
 @login_required
 def boletin_view(request, trimestre=None):
     estudiante = request.user
     boletin_completo = estudiante.boletin_data or {}
 
-    # Filtrar solo trimestres con contenido útil (más allá de DNI, STUDENT, etc.)
+    # Filtrar trimestres con contenido real
     def tiene_info(tr_data):
         datos = {k: v for k, v in tr_data.items() if k not in ['DNI', 'STUDENT', 'TEACHER']}
         return any(v not in [None, '', '-', '-nohay-', 'falta'] for v in datos.values())
 
-    trimestres_validos = {k: v for k, v in boletin_completo.items() if tiene_info(v)}
+    tr_validos = {k: v for k, v in boletin_completo.items() if tiene_info(v)}
 
-    # Ordenar trimestres válidos como 1T, 2T, 3T
     trimestres = sorted(
-        trimestres_validos.keys(),
+        tr_validos.keys(),
         key=lambda t: ORDEN_TRIMESTRES.index(t) if t in ORDEN_TRIMESTRES else 99
     )
 
-    # Elegir trimestre a mostrar
     trimestre_actual = trimestre or (trimestres[0] if trimestres else None)
-    boletin_raw = boletin_completo.get(trimestre_actual, {}) if trimestre_actual else {}
+    boletin_raw = tr_validos.get(trimestre_actual, {}) if trimestre_actual else {}
 
     # Excluir campos no mostrables
-    excluir = ['DNI', 'STUDENT']  # TEACHER se muestra al final
-    boletin = {k: v for k, v in boletin_raw.items() if k not in excluir}
+    boletin = {k: v for k, v in boletin_raw.items() if k not in ['DNI', 'STUDENT']}
 
-    # ¿Vista/plantilla según formato?
+    # Labels y plantilla
     if estudiante.formato_boletin == "kinder":
-        labels_kinder = {
+        labels = {
             "WP": "Works and Plays Well with Others",
             "SR": "Shows Respect for Others",
             "FC": "Follow Classroom Rules",
@@ -137,10 +179,10 @@ def boletin_view(request, trimestre=None):
             "CLASSES": "Total Classes",
             "ABSENT": "Days Absent",
         }
-        boletin_con_etiquetas = boletin  # mantenemos claves técnicas; los template tags las traducen
         template_name = "boletines_app/boletin_kinder.html"
+        codes_first = KINDER_ORDER
     else:
-        labels_generales = {
+        labels = {
             "WT": "Written Test",
             "OT": "Oral Test",
             "PP": "Practice Paper",
@@ -148,72 +190,60 @@ def boletin_view(request, trimestre=None):
             "PIN": "Participation in Class",
             "HM": "Homework",
             "RP": "Relationship with partners",
-            "ABSENT": "Absent",
             "CLASSES": "Classes",
+            "ABSENT": "Absent",
             "TEACHER": "Teacher",
         }
-        boletin_con_etiquetas = boletin
         template_name = "boletines_app/boletin_general.html"
+        codes_first = GENERAL_ORDER
 
-    # Orden para niveles generales y kinder
-    # ---- ORDEN ROBUSTO (reemplaza tu bloque de orden actual) ----
-    orden_general = ['WT', 'OT', 'PP', 'BE', 'PIN', 'HM', 'RP', 'CLASSES', 'ABSENT', 'TEACHER']
-    orden_kinder  = ['WP', 'SR', 'FC', 'FD', 'CT', 'CIC', 'ABSENT', 'CLASSES']
-    orden = orden_kinder if estudiante.formato_boletin == "kinder" else orden_general
-
-    campos_finales = ['CLASSES', 'ABSENT', 'TEACHER']
-
-    import re
-    def _norm(x): return str(x).strip().upper()
-    def _contenido_num(k):
-        m = re.match(r'CONTENIDO\s+(\d+)', _norm(k))
-        return int(m.group(1)) if m else None
-
-# Mapa normalizado->clave_real presente en boletin
-    norm_map = {}
-    for k in boletin.keys():
-        nk = _norm(k)
-    # si hay duplicados normalizados, conservamos la primera aparición
-        if nk not in norm_map:
-            norm_map[nk] = k
-
+    # ---------- ORDEN EXACTO ----------
+    remaining = dict(boletin)   # copia de trabajo
     boletin_ordenado = []
-    usados = set()
 
-    # 1) primeros según orden deseado (excluyendo finales)
-    for code in orden:
-        if code in campos_finales:
-            continue
-        real_key = norm_map.get(_norm(code))
-        if real_key is not None and real_key not in usados:
-            boletin_ordenado.append((real_key, boletin.get(real_key)))
-            usados.add(real_key)
+    def pick_first(code):
+        """Mueve al ordenado la primera clave de 'remaining' que matchee el grupo 'code'."""
+        if code not in G:
+            return
+        ks = list(remaining.keys())
+        for k in ks:
+            if N(k) in G[code]:
+                boletin_ordenado.append((k, remaining.pop(k)))
+                return
 
-# 2) luego el resto (p.ej. CONTENIDO 1..N). En Kinder los ordenamos por número.
-    otros = [
-        (k, v) for k, v in boletin.items()
-        if k not in usados and _norm(k) not in {_norm(c) for c in campos_finales}
+    # 1) Códigos fijos primero (WP.. o WT..)
+    for code in codes_first:
+        pick_first(code)
+
+    # 2) Kinder: Contenido 1..N en orden numérico
+    if estudiante.formato_boletin == 'kinder':
+        conts = [(k, v) for k, v in remaining.items() if contenido_num(k) is not None]
+        conts.sort(key=lambda kv: contenido_num(kv[0]))
+        boletin_ordenado += conts
+        for k, _ in conts:
+            remaining.pop(k, None)
+
+    # 3) El resto (no finales) en orden alfabético estable
+    finales_norm = set().union(*[G[c] for c in FINAL_ORDER])
+    resto = [(k, v) for k, v in remaining.items() if N(k) not in finales_norm]
+    resto.sort(key=lambda kv: N(kv[0]))
+    boletin_ordenado += resto
+    for k, _ in resto:
+        remaining.pop(k, None)
+
+    # 4) Campos finales en orden fijo
+    for code in FINAL_ORDER:
+        pick_first(code)
+
+    # 5) Conversión ABSENT/CLASSES a int
+    abs_or_cls_norm = G['ABSENT'] | G['CLASSES']
+    boletin_ordenado = [
+        (k, _to_int_if_number(v) if N(k) in abs_or_cls_norm else v)
+        for k, v in boletin_ordenado
     ]
+    # ---------- FIN ORDEN ----------
 
-    if estudiante.formato_boletin == "kinder":
-        # ordenar CONTENIDO N por N, dejando lo demás al final
-        otros.sort(key=lambda kv: (_contenido_num(kv[0]) is None,
-                                   999 if _contenido_num(kv[0]) is None else _contenido_num(kv[0]),
-                                   str(kv[0])))
-
-    boletin_ordenado += otros
-
-# 3) finalmente los campos administrativos en orden fijo
-    for code in campos_finales:
-        real_key = norm_map.get(_norm(code))
-        if real_key is not None and real_key not in usados:
-            boletin_ordenado.append((real_key, boletin.get(real_key)))
-            usados.add(real_key)
-# ---- FIN ORDEN ROBUSTO ----
-
-
-    # --------- NUEVO: grupo_actual + contenidos_map para KIDS 4 ----------
-    # Intentamos deducir el grupo/curso del estudiante de forma robusta
+    # ------- Mapeo de contenidos para Kinder 4 (para smart_label en el template) -------
     grupo_actual = (
         getattr(estudiante, "grupo", None)
         or getattr(estudiante, "curso", None)
@@ -223,8 +253,22 @@ def boletin_view(request, trimestre=None):
     )
     grupo_upper = str(grupo_actual).upper() if grupo_actual else ""
 
+    # Autodetección si es kinder y hay Contenido 1..7
+    if estudiante.formato_boletin == "kinder" and not grupo_upper:
+        claves_norm = {N(k) for k, _ in boletin_ordenado}
+        if all(N(f"Contenido {i}") in claves_norm for i in range(1, 8)):
+            grupo_upper = "KIDS 4"
+
     contenidos_map = {
-        # Permito alias para robustez:
+        "KIDS 4": {
+            "CONTENIDO 1": "Greetings",
+            "CONTENIDO 2": "Weather",
+            "CONTENIDO 3": "Colours",
+            "CONTENIDO 4": "Numbers",
+            "CONTENIDO 5": "Toys",
+            "CONTENIDO 6": "Body parts",
+            "CONTENIDO 7": "Pets",
+        },
         "KINDER 4": {
             "CONTENIDO 1": "Greetings",
             "CONTENIDO 2": "Weather",
@@ -244,41 +288,13 @@ def boletin_view(request, trimestre=None):
             "CONTENIDO 7": "Pets",
         },
     }
-    # --------------------------------------------------------------------
-
-    # Labels a pasar al template (según formato)
-    if estudiante.formato_boletin == "kinder":
-        labels = {
-            "WP": "Works and Plays Well with Others",
-            "SR": "Shows Respect for Others",
-            "FC": "Follow Classroom Rules",
-            "FD": "Follows Directions",
-            "CT": "Completes Tasks in Appropriate Time",
-            "CIC": "Cooperates in Class Routine",
-            "CLASSES": "Total Classes",
-            "ABSENT": "Days Absent",
-        }
-        # (No forzamos "Contenido N" acá: lo resuelve smart_label con contenidos_map)
-    else:
-        labels = {
-            "WT": "Written Test",
-            "OT": "Oral Test",
-            "PP": "Practice Paper",
-            "BE": "Behaviour",
-            "PIN": "Participation in Class",
-            "HM": "Homework",
-            "RP": "Relationship with partners",
-            "ABSENT": "Absent",
-            "CLASSES": "Classes",
-            "TEACHER": "Teacher",
-        }
+    # -------------------------------------------------------------------------------
 
     return render(request, template_name, {
         "boletin_ordenado": boletin_ordenado,
         "etiquetas": labels,
         "trimestres": trimestres,
         "trimestre_actual": trimestre_actual,
-        # nuevo para que el template renombre "Contenido N"
         "grupo_actual": grupo_upper,
         "contenidos_map": contenidos_map,
     })

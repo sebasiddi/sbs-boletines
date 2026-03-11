@@ -2,38 +2,84 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-        <!-- Logo/imagen -->
-        <a class="navbar-brand" href="#">
+
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
             <img src="{% static 'boletines_app/img/s.png' %}"
-                 alt="Logo" 
+                 alt="Logo"
                  class="d-inline-block align-top logo">
         </a>
-        
-        <!-- Resto de tu navbar... -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-        
+
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                {% if user.is_authenticated %}
+
+            <!-- LINKS LANDING -->
+            {% if not user.is_authenticated %}
+            <ul class="navbar-nav me-auto">
+
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'boletin' %}">Mi Boletin</a>
+                    <a class="nav-link" href="#propuesta">Propuesta</a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#edades">Edades</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#como-funciona">Cómo funciona</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#contacto">Contacto</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="btn btn-secondary ms-2" href="#alumnos">
+                        Alumnos
+                    </a>
+                </li>
+
+            </ul>
+            {% endif %}
+
+
+            <!-- LINKS SISTEMA -->
+            <ul class="navbar-nav ms-auto">
+
+                {% if user.is_authenticated %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'boletin' %}">Mi Boletín</a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'perfil' %}">Mi Perfil</a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}">Cerrar Sesión</a>
                 </li>
-                {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#exampleModal">Iniciar Sesión</a>
 
-<!--                     <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
- -->                </li>
+                {% else %}
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="#"
+                       data-bs-toggle="modal"
+                       data-bs-target="#exampleModal">
+                        Iniciar Sesión
+                    </a>
+                </li>
+
                 {% endif %}
+
             </ul>
+
         </div>
     </div>
 </nav>

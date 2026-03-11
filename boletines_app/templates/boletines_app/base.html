@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
 
-    <link rel="stylesheet" href="{% static 'boletines_app/css/main_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'boletines_app/Scss/main.css' %}">
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -90,6 +90,6 @@
     © {{ now|date:"Y" }} Step By Step - Todos los derechos reservados
   </div>
 </footer>
-
+{% include "boletines_app/components/cta_whatsapp.html" %}
 </body>
 </html>

@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Step by Step | Instituto de Inglés en Barracas</title>
+  <meta
+    name="description"
+    content="Step by Step es un instituto de inglés en Barracas con cursos presenciales desde kinder hasta adolescentes de 17 años, en grupos reducidos y con seguimiento personalizado."
+  />
+  <style>
+    :root {
+      --navy: #1f3c88;
+      --navy-dark: #162c63;
+      --sky: #eaf2ff;
+      --cream: #fffaf2;
+      --yellow: #ffd76a;
+      --mint: #dff4ea;
+      --text: #223;
+      --muted: #5f6675;
+      --white: #ffffff;
+      --border: #dbe3f0;
+      --shadow: 0 12px 32px rgba(31, 60, 136, 0.12);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --container: 1160px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, #ffffff 0%, #f8fbff 40%, #f5f8ff 100%);
+      line-height: 1.55;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .container {
+      width: min(92%, var(--container));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(219, 227, 240, 0.9);
+    }
+
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand small {
+      color: var(--navy);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .brand strong {
+      font-size: 1.65rem;
+      color: var(--navy-dark);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 0.98rem;
+      color: var(--muted);
+    }
+
+    .nav-links a:hover {
+      color: var(--navy);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--navy);
+      color: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary:hover {
+      background: var(--navy-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--navy);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--sky);
+    }
+
+    .hero {
+      padding: 72px 0 54px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 38px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      background: var(--mint);
+      color: #206246;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0 0 18px;
+      font-size: clamp(2.3rem, 5vw, 4.4rem);
+      line-height: 1.05;
+      color: var(--navy-dark);
+    }
+
+    .hero p {
+      margin: 0 0 28px;
+      max-width: 640px;
+      font-size: 1.08rem;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag {
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-visual {
+      min-height: 520px;
+      position: relative;
+      background:
+        linear-gradient(160deg, rgba(31,60,136,0.1), rgba(255,215,106,0.14)),
+        linear-gradient(180deg, #eef5ff 0%, #ffffff 100%);
+      padding: 28px;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .mock-photo {
+      width: 100%;
+      border-radius: 20px;
+      background:
+        linear-gradient(145deg, rgba(31,60,136,0.10), rgba(31,60,136,0.03)),
+        #ffffff;
+      border: 1px solid rgba(31, 60, 136, 0.08);
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .photo-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .bubble {
+      background: var(--yellow);
+      color: #6d5200;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 0.92rem;
+      max-width: 180px;
+    }
+
+    .mini-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      box-shadow: 0 10px 24px rgba(31, 60, 136, 0.08);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .class-scene {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 16px 0;
+    }
+
+    .student,
+    .teacher {
+      position: relative;
+      width: 112px;
+      height: 210px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .head {
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #ffd7b2;
+      border: 2px solid rgba(0,0,0,0.04);
+      z-index: 2;
+    }
+
+    .body {
+      margin-top: -6px;
+      width: 90px;
+      height: 112px;
+      border-radius: 24px;
+      background: #8db3ff;
+    }
+
+    .student .body {
+      background: #98c7a8;
+    }
+
+    .teacher .body {
+      background: #8db3ff;
+    }
+
+    .desk {
+      margin-top: 12px;
+      width: 112px;
+      height: 16px;
+      background: #d9b17b;
+      border-radius: 10px;
+    }
+
+    .board {
+      align-self: center;
+      width: 180px;
+      height: 120px;
+      border-radius: 18px;
+      background: #203153;
+      box-shadow: inset 0 0 0 8px #f7d777;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .photo-bottom {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      flex: 1;
+      min-width: 120px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--navy-dark);
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .section {
+      padding: 82px 0;
+    }
+
+    .section.alt {
+      background: linear-gradient(180deg, rgba(234,242,255,0.55), rgba(255,255,255,0));
+    }
+
+    .section-header {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+
+    .section-header h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      line-height: 1.1;
+      color: var(--navy-dark);
+    }
+
+    .section-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: 0 10px 22px rgba(31,60,136,0.06);
+    }
+
+    .icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 1.4rem;
+      background: var(--sky);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      color: var(--navy-dark);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .step {
+      position: relative;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 22px;
+    }
+
+    .step-number {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .location-box,
+    .login-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .location-box h3,
+    .login-box h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      color: var(--navy-dark);
+      font-size: 1.4rem;
+    }
+
+    .location-list {
+      display: grid;
+      gap: 12px;
+      margin: 18px 0 24px;
+      color: var(--muted);
+    }
+
+    .map-placeholder {
+      border-radius: 18px;
+      min-height: 250px;
+      background:
+        linear-gradient(135deg, rgba(31,60,136,.12), rgba(255,215,106,.18)),
+        linear-gradient(180deg, #eef3fb, #fdfefe);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--navy-dark);
+      padding: 24px;
+      font-weight: 700;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .login-form input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .login-form input:focus {
+      border-color: var(--navy);
+      box-shadow: 0 0 0 4px rgba(31, 60, 136, 0.10);
+    }
+
+    .cta {
+      padding: 90px 0;
+    }
+
+    .cta-box {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+      color: var(--white);
+      border-radius: 32px;
+      padding: 44px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .cta-box h2 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.08;
+    }
+
+    .cta-box p {
+      margin: 0;
+      color: rgba(255,255,255,0.88);
+      font-size: 1.05rem;
+      max-width: 660px;
+    }
+
+    .cta-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: flex-end;
+    }
+
+    .btn-light {
+      background: var(--white);
+      color: var(--navy-dark);
+    }
+
+    .btn-light:hover {
+      background: var(--cream);
+    }
+
+    .btn-outline-light {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.3);
+      color: var(--white);
+    }
+
+    .btn-outline-light:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    footer {
+      padding: 32px 0 48px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .footer-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+
+    .whatsapp-float {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 60;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #25d366;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .whatsapp-float:hover {
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 1024px) {
+      .hero-grid,
+      .split,
+      .cta-box,
+      .grid-4,
+      .grid-3,
+      .steps {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .cta-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 0;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+
+      .hero-grid,
+      .split,
+      .cta-box,
+      .grid-4,
+      .grid-3,
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 42px;
+      }
+
+      .hero-visual {
+        min-height: auto;
+      }
+
+      .class-scene {
+        flex-direction: column;
+      }
+
+      .board {
+        width: 100%;
+        max-width: 260px;
+      }
+
+      .cta-box {
+        padding: 30px 24px;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn,
+      .btn-primary,
+      .btn-secondary,
+      .btn-light,
+      .btn-outline-light {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a class="whatsapp-float" href="https://wa.me/5491124982453" target="_blank" aria-label="WhatsApp">
+    W
+  </a>
+
+  <header class="topbar">
+    <div class="container nav">
+      <a href="#inicio" class="brand">
+        <small>Instituto de inglés</small>
+        <strong>Step by Step</strong>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#propuesta">Propuesta</a>
+        <a href="#edades">Edades</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#contacto">Contacto</a>
+        <a class="btn btn-secondary" href="#alumnos">Alumnos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Presencial en Barracas · Kinder a 17 años</span>
+          <h1>Inglés en grupos chicos, con acompañamiento real</h1>
+          <p>
+            En <strong>Step by Step</strong> acompañamos a cada alumno de forma cercana y personalizada.
+            Al trabajar con <strong>grupos reducidos</strong>, podemos conocer mejor a cada estudiante,
+            seguir su progreso y sostener un vínculo más profundo con las familias.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="https://wa.me/5491124982453" target="_blank">
+              Consultar por WhatsApp
+            </a>
+            <a class="btn btn-secondary" href="#alumnos">
+              Ingreso alumnos
+            </a>
+          </div>
+
+          <div class="hero-tags">
+            <span class="tag">Instituto de barrio</span>
+            <span class="tag">Clases 100% presenciales</span>
+            <span class="tag">Seguimiento personalizado</span>
+            <span class="tag">Barracas · Zona sur CABA</span>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-visual">
+            <div class="mock-photo">
+              <div class="photo-top">
+                <div class="bubble">Grupos reducidos para acompañar mejor a cada alumno</div>
+                <div class="mini-card">Aprender con confianza también es parte del proceso</div>
+              </div>
+
+              <div class="class-scene">
+                <div class="student">
+                  <div class="head"></div>
+                  <div class="body"></div>
+                  <div class="desk"></div>
+                </div>
+
+                <div class="board">English<br>Step by Step</div>
+
+                <div class="teacher">
+                  <div class="head"></div>
+                  <div class="body"></div>
+                  <div class="desk"></div>
+                </div>
+              </div>
+
+              <div class="photo-bottom">
+                <div class="stat">
+                  <strong>Presencial</strong>
+                  <span>Aprendizaje cercano y acompañamiento continuo</span>
+                </div>
+                <div class="stat">
+                  <strong>Kinder a 17</strong>
+                  <span>Propuestas adaptadas a cada etapa</span>
+                </div>
+                <div class="stat">
+                  <strong>WhatsApp</strong>
+                  <span>Canal simple para consultas de familias</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="propuesta">
+      <div class="container">
+        <div class="section-header">
+          <h2>Un instituto cercano a cada alumno</h2>
+          <p>
+            Step by Step es un instituto chico, de barrio, donde la enseñanza se apoya en el vínculo,
+            el seguimiento y el conocimiento real de cada estudiante. La propuesta apunta a que aprender
+            inglés no sea algo impersonal, sino un proceso acompañado paso a paso.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <div class="icon">👥</div>
+            <h3>Grupos reducidos</h3>
+            <p>
+              Menos alumnos por curso permite observar mejor el progreso, acompañar dificultades
+              y potenciar fortalezas.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">📍</div>
+            <h3>Presencial en Barracas</h3>
+            <p>
+              Un espacio cercano para familias de la zona sur de Capital Federal que buscan una
+              propuesta estable y de confianza.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🤝</div>
+            <h3>Relación con las familias</h3>
+            <p>
+              La comunicación cercana ayuda a acompañar mejor a cada chico y a sostener su proceso
+              de aprendizaje en el tiempo.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="edades">
+      <div class="container">
+        <div class="section-header">
+          <h2>Propuestas según cada etapa</h2>
+          <p>
+            Desde los primeros años hasta la adolescencia, la enseñanza se adapta a la edad,
+            al ritmo y a la forma de aprender de cada grupo.
+          </p>
+        </div>
+
+        <div class="grid-4">
+          <article class="card">
+            <div class="icon">🧸</div>
+            <h3>Kinder</h3>
+            <p>
+              Primer acercamiento al idioma a través del juego, la escucha, la rutina y actividades
+              acordes a la edad.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">📚</div>
+            <h3>Niños</h3>
+            <p>
+              Desarrollo gradual de vocabulario, comprensión, oralidad y escritura en un entorno
+              cuidado y motivador.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">✨</div>
+            <h3>Pre-adolescentes</h3>
+            <p>
+              Mayor autonomía y consolidación del idioma, con propuestas que combinan práctica
+              y seguimiento cercano.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🎯</div>
+            <h3>Adolescentes hasta 17</h3>
+            <p>
+              Clases pensadas para fortalecer la comunicación, la comprensión y la seguridad
+              en el uso del inglés.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container">
+        <div class="section-header">
+          <h2>Por qué elegir Step by Step</h2>
+          <p>
+            La propuesta combina cercanía, seguimiento y un entorno de confianza para que cada alumno
+            pueda aprender con más seguridad y continuidad.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <div class="icon">💬</div>
+            <h3>Atención personalizada</h3>
+            <p>Cada estudiante importa. El seguimiento es más cercano y sostenido.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🏫</div>
+            <h3>Clases presenciales</h3>
+            <p>El trabajo en el aula favorece el vínculo, la participación y la confianza.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🌱</div>
+            <h3>Aprendizaje progresivo</h3>
+            <p>Se acompaña el crecimiento del alumno de acuerdo con su edad y su momento.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">❤️</div>
+            <h3>Ambiente cálido</h3>
+            <p>Un instituto de barrio donde aprender también significa sentirse acompañado.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">📝</div>
+            <h3>Seguimiento del proceso</h3>
+            <p>El recorrido de cada alumno se observa de forma más profunda.</p>
+          </article>
+
+          <article class="card">
+            <div class="icon">📲</div>
+            <h3>Contacto simple</h3>
+            <p>Las consultas y el primer acercamiento se resuelven fácilmente por WhatsApp.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="como-funciona">
+      <div class="container">
+        <div class="section-header">
+          <h2>Cómo funciona</h2>
+          <p>
+            La idea es que el primer contacto sea simple y claro para las familias.
+          </p>
+        </div>
+
+        <div class="steps">
+          <article class="step">
+            <div class="step-number">1</div>
+            <h3>Escribís por WhatsApp</h3>
+            <p>Nos contás la edad del alumno y la información que necesitás.</p>
+          </article>
+
+          <article class="step">
+            <div class="step-number">2</div>
+            <h3>Te orientamos</h3>
+            <p>Respondemos según la etapa y la propuesta más adecuada.</p>
+          </article>
+
+          <article class="step">
+            <div class="step-number">3</div>
+            <h3>Conocés la modalidad</h3>
+            <p>Te contamos cómo trabajamos y cómo se organiza el cursado.</p>
+          </article>
+
+          <article class="step">
+            <div class="step-number">4</div>
+            <h3>Coordinás el ingreso</h3>
+            <p>Avanzás con la inscripción y el acceso del alumno a la plataforma.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="contacto">
+      <div class="container split">
+        <div class="location-box">
+          <h3>Contacto y ubicación</h3>
+          <p>
+            Estamos en <strong>Barracas</strong>, en la zona sur de la Ciudad de Buenos Aires.
+            Trabajamos con modalidad <strong>100% presencial</strong>.
+          </p>
+
+          <div class="location-list">
+            <div><strong>Zona:</strong> Barracas, CABA</div>
+            <div><strong>Modalidad:</strong> Presencial</div>
+            <div><strong>Edades:</strong> Kinder a adolescentes de 17 años</div>
+            <div><strong>Canal principal:</strong> WhatsApp</div>
+          </div>
+
+          <a class="btn btn-primary" href="https://wa.me/5491124982453" target="_blank">
+            Consultar por WhatsApp
+          </a>
+
+          <div style="height: 18px;"></div>
+
+          <div class="map-placeholder">
+            Acá después podés reemplazar esto por un mapa real<br>
+            o por la dirección exacta del instituto
+          </div>
+        </div>
+
+        <div class="login-box" id="alumnos">
+          <h3>Ingreso de alumnos</h3>
+          <p>
+            Este bloque está pensado para que después lo conectes con tu plataforma actual.
+            Por ahora sirve como maqueta visual del acceso.
+          </p>
+
+          <form class="login-form" onsubmit="event.preventDefault(); alert('Esto es solo una maqueta visual. Después lo conectamos con Django.');">
+            <input type="text" placeholder="Usuario o DNI" />
+            <input type="password" placeholder="Contraseña" />
+            <button class="btn btn-primary" type="submit">Ingresar</button>
+          </form>
+
+          <p style="margin-top: 16px; color: var(--muted); font-size: 0.95rem;">
+            Más adelante este acceso puede llevar al login real para ver boletines y otra información del alumno.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="container">
+        <div class="cta-box">
+          <div>
+            <h2>¿Querés conocer la propuesta para tu hijo o hija?</h2>
+            <p>
+              Escribinos por WhatsApp y te contamos cómo trabajamos, qué grupo puede ser el más adecuado
+              y toda la información que necesites para dar el primer paso.
+            </p>
+          </div>
+
+          <div class="cta-actions">
+            <a class="btn btn-light" href="https://wa.me/5491124982453" target="_blank">
+              Hablar por WhatsApp
+            </a>
+            <a class="btn btn-outline-light" href="#alumnos">
+              Ingreso alumnos
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div><strong>Step by Step</strong> · Instituto de inglés</div>
+      <div>Barracas · CABA · Modalidad presencial</div>
+    </div>
+  </footer>
+
+</body>
+</html>

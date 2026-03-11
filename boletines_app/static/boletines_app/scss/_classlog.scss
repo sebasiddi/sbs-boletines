@@ -1,0 +1,97 @@
+.classLog {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  &__header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  &__subtitle {
+    margin: .35rem 0 0;
+    color: #64748b;
+    font-size: .95rem;
+  }
+
+  &__list {
+    display: grid;
+    gap: 1rem;
+
+    // en pantallas medianas/grandes: 2 columnas
+    @media (min-width: 820px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  &__card {
+    background: #9e1919;
+    border: 1px solid rgba(15, 23, 42, .08);
+    border-radius: 14px;
+    padding: 1.25rem 1.25rem 1.1rem;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, .08);
+  }
+
+  &__meta {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    color: #64748b;
+    font-size: .85rem;
+    margin-bottom: .6rem;
+  }
+
+  &__date {
+    font-weight: 800;
+    color: #2562b8;
+  }
+
+  &__topic {
+    margin: 0 0 .9rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+  }
+
+  &__block {
+    margin-top: .75rem;
+    padding: .85rem .9rem;
+    border-radius: 12px;
+    background: rgba(59, 130, 246, .06);
+    border: 1px solid rgba(59, 130, 246, .12);
+  }
+
+  &__label {
+    font-size: .75rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #1e40af;
+    margin-bottom: .4rem;
+  }
+
+  &__text {
+    font-size: .95rem;
+    color: #0f172a;
+    line-height: 1.45;
+    white-space: pre-line; // por si en Sheets ponen saltos de línea
+  }
+
+  &__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 14px;
+    background: rgba(100, 116, 139, .06);
+    border: 1px dashed rgba(100, 116, 139, .35);
+    color: #475569;
+  }
+}
